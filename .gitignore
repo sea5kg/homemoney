@@ -29,6 +29,7 @@
 
 *.res
 *.local
+*.vlb 
 
 bin/
 src/Win32

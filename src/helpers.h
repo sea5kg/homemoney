@@ -19,8 +19,14 @@ struct exlClass {
 
 struct exlMonth {
 	UnicodeString Name;
+	UnicodeString Class;
 	double Price;
 	UnicodeString Month;
+};
+
+struct exlSumClass {
+	UnicodeString Name;
+    double Sum;
 };
 
 #endif
