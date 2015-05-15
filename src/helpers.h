@@ -22,6 +22,8 @@ struct exlMonth {
 	UnicodeString Class;
 	double Price;
 	UnicodeString Month;
+//	std::vector<UnicodeString> Hyperlinks;
+	UnicodeString LinkToClassification;
 };
 
 struct exlSumClass {

@@ -19,6 +19,25 @@
 
 const int xlContinuous = 1;
 const int xlUp = 3;
+const int xlDash = -4115;
+const int xlDashDot = 4;
+const int xlDashDotDot = 5;
+const int xlDot = -4118;
+const int xlDouble = -4119;
+const int xlLIneStyleNone = -4142;
+const int xlSlantDashDot = 13;
+const int xlHairline = 1;
+const int xlThin = 2;
+const int xlMedium = -4138;
+const int xlThick = 4;
+const int xlDiagonalDown = 5;
+const int xlDiagonalUp = 6;
+const int xlEdgeBottom = 9;
+const int xlEdgeLeft = 7;
+const int xlEdgeRight = 10;
+const int xlEdgeTop = 8;
+const int xlInsideHorizontal = 12;
+const int xlInsideVertical = 11;
 
 //---------------------------------------------------------------------------
 class TForm1 : public TForm
@@ -60,10 +79,12 @@ private:	// User declarations
 	void ReadClassifications(Variant &vSheet, std::vector<exlClass> &classes);
 	void WriteClassifications(Variant &vSheet, std::vector<exlClass> &classes);
 	void ReadMonth(Variant &vSheet, std::vector<exlMonth> &month);
+	void ReadMonthSum(Variant &vSheet, double &sum);
 	void setBorders(Variant &vSheet, int nRow, int nCol);
 	void setColor(Variant &vSheet, int nRow, int nCol, int nColor);
 	void clearCell(Variant &vSheet, int nRow, int nCol);
 	int RGBToInt(int r, int g, int b);
+    UnicodeString createHyperLinkToClassification(std::vector<exlClass> &classes, int nLine);
 
 public:		// User declarations
 	__fastcall TForm1(TComponent* Owner);
