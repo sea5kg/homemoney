@@ -144,8 +144,8 @@
             <BuildOrder>5</BuildOrder>
         </CppCompile>
         <FormResources Include="main.dfm"/>
-        <FormResources Include="classeditor.dfm"/>
         <FormResources Include="SelectClass.dfm"/>
+        <FormResources Include="classeditor.dfm"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

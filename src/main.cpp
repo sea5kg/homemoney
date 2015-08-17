@@ -106,11 +106,12 @@ bool TForm1::MakeBackup() {
 	newfilename.Delete(newfilename.Length() - ExtractFileExt(m_strFileName).Length() + 1, ExtractFileExt(m_strFileName).Length());
 
 	newfilename =
-		ExtractFileDir(m_strFileName) + L"\\backups\\" +
-		newfilename + " (" + TDateTime::CurrentDateTime().FormatString("yyyy-mm-dd hh:nn") + ")" +
+		dir + L"\\" +
+		newfilename + " (" + TDateTime::CurrentDateTime().FormatString("yyyy-mm-dd hh_nn") + ")" +
 		ExtractFileExt(m_strFileName);
 	Log->Lines->Add("Сохраняю резервную копию файла в " + newfilename);
-	return CopyFile(m_strFileName.c_str(),newfilename.c_str(),false);
+	bool bResult = CopyFile(m_strFileName.c_str(),newfilename.c_str(),false);
+	return bResult;
 }
 
 //---------------------------------------------------------------------------
@@ -128,6 +129,7 @@ void TForm1::ReadClassifications(Variant &vSheet, std::vector<exlClass> &classes
 	nLastRow = std::max(nLastRow, nLastRow2);
 	nLastRow = std::max(nLastRow, nLastRow3);
 	nLastRow = std::max(nLastRow, nLastRow4);
+	lblStatus->Caption = "Считываю классификации...";
 	Log->Lines->Add("Считываю классификации  всего строк: " + IntToStr(nLastRow-1));
 	ProgressBar1->Max = nLastRow;
 	ProgressBar1->Min = 0;
@@ -148,12 +150,14 @@ void TForm1::ReadClassifications(Variant &vSheet, std::vector<exlClass> &classes
 			classes.push_back(cl);
 		}
 	}
+	lblStatus->Caption = "Готово";
 }
 
 //---------------------------------------------------------------------------
 
 void TForm1::WriteClassifications(Variant &vSheet, std::vector<exlClass> &classes)
 {
+	lblStatus->Caption = "Приступаю к сортировке классификаций...";
 	Log->Lines->Add("Приступаю к сортировке классификаций...");
 	int nReplaced = 1;
 
@@ -182,6 +186,7 @@ void TForm1::WriteClassifications(Variant &vSheet, std::vector<exlClass> &classe
 	nLastRow = std::max(nLastRow, nLastRow3);
 	nLastRow = std::max(nLastRow, nLastRow4);
 
+	lblStatus->Caption = "Произвожу очистку классификаций в файле...";
 	Log->Lines->Add("Произвожу очистку классификаций в файле");
 	ProgressBar1->Max = nLastRow;
 	ProgressBar1->Min = 0;
@@ -193,7 +198,7 @@ void TForm1::WriteClassifications(Variant &vSheet, std::vector<exlClass> &classe
 		vSheet.OlePropertyGet("Cells").OlePropertyGet("Item",i+1,3).OlePropertySet("Value", WideString(""));
 		vSheet.OlePropertyGet("Cells").OlePropertyGet("Item",i+1,4).OlePropertySet("Value", WideString(""));
 	}
-
+	lblStatus->Caption = "Приступаю к записи классификаций в файл...";
 	Log->Lines->Add("Приступаю к записи в файл " + IntToStr((int)classes.size()));
 	ProgressBar1->Max = classes.size();
 	ProgressBar1->Min = 0;
@@ -209,6 +214,7 @@ void TForm1::WriteClassifications(Variant &vSheet, std::vector<exlClass> &classe
 		vSheet.OlePropertyGet("Cells").OlePropertyGet("Item",i+2,3).OlePropertySet("Value", WideString(cl.Comment));
 		vSheet.OlePropertyGet("Cells").OlePropertyGet("Item",i+2,4).OlePropertySet("Value", WideString(cl.Monthes));
 	}
+	lblStatus->Caption = "";
 }
 
 //---------------------------------------------------------------------------
@@ -219,6 +225,7 @@ void TForm1::ReadMonth(Variant &vSheet, std::vector<exlMonth> &month)
 	int nRowsCount = vSheet.OlePropertyGet("Cells").OlePropertyGet("Rows").OlePropertyGet("Count");
 	int nLastRow = vSheet.OlePropertyGet("Cells", nRowsCount, 3).OlePropertyGet("End", xlUp).OlePropertyGet("Row");
 
+	lblStatus->Caption = "Загрузка данных с листа " + strPageName;
 	Log->Lines->Add(" * Произвожу загрузку данных с листа " + strPageName + " (строк: " + IntToStr(nLastRow-1) + ")");
 	ProgressBar1->Max = nLastRow;
 	ProgressBar1->Min = 0;
@@ -242,7 +249,7 @@ void TForm1::ReadMonth(Variant &vSheet, std::vector<exlMonth> &month)
 	}
 	ProgressBar1->Position = 0;
 	Log->Lines->Add(" * Найдено записей: " + IntToStr(nFound) + "");
-
+	lblStatus->Caption = "";
 }
 
 //---------------------------------------------------------------------------
@@ -695,20 +702,24 @@ void __fastcall TForm1::actRedesignClassificationsUpdate(TObject *Sender)
 
 void __fastcall TForm1::actRedesignClassificationsExecute(TObject *Sender)
 {
+	lblStatus->Caption = "";
 	if(!MakeBackup()) {
 		Log->Lines->Add("Не удалось создать резервную копию файла");
+		lblStatus->Caption = "Ошибка: Не удалось создать резервную копию файла";
 		return;
 	}
 
+	lblStatus->Caption = "Открываю файл на чтение...";
 	Variant app = Variant::CreateObject("Excel.Application");
 	Variant excel = app.OlePropertyGet("Workbooks").OleFunction("Open", WideString(m_strFileName.c_str()));
 	Variant vSheets = excel.OlePropertyGet("Worksheets");
-    Variant vSheet = vSheets.OlePropertyGet("Item",m_nPageClassification);
+	Variant vSheet = vSheets.OlePropertyGet("Item",m_nPageClassification);
 	UnicodeString strPageName = vSheet.OlePropertyGet("Name");
 	if (strPageName.UpperCase() != UnicodeString("классификации").UpperCase()) {
-	   app.OleProcedure("Quit");
-	   MessageBox (Handle, UnicodeString(L"Не верное имя страницы").c_str(), L"prompt", MB_OK);
-	   return;
+		app.OleProcedure("Quit");
+		MessageBox (Handle, UnicodeString(L"Не верное имя страницы").c_str(), L"prompt", MB_OK);
+		lblStatus->Caption = "Ошибка: Не верное имя страницы";
+		return;
 	};
 
 	std::vector<exlClass> classes;
@@ -729,6 +740,8 @@ void __fastcall TForm1::actRedesignClassificationsExecute(TObject *Sender)
 	ProgressBar1->Max = nAll;
 	ProgressBar1->Min = 0;
 	ProgressBar1->Position = 0;
+
+	lblStatus->Caption = "Поиск наименований которые отсутвуют в месяцах...";
 	Log->Lines->Add("Произвожу поиск наименований которые отсутвуют в месяцах...");
 	for (unsigned int iC = 0; iC < classes.size(); iC++) {
 		exlClass cl = classes[iC];
@@ -760,8 +773,9 @@ void __fastcall TForm1::actRedesignClassificationsExecute(TObject *Sender)
 	ProgressBar1->Min = 0;
 	ProgressBar1->Position = 0;
 	int nAddClasses = 0;
+	lblStatus->Caption = "Поиск наименований которые отсутвуют в списке классификаций...";
 	Log->Lines->Add("Произвожу поиск наименований которые отсутвуют в списке классификаций...");
-    for (unsigned int iM = 0; iM < months.size(); iM++) {
+	for (unsigned int iM = 0; iM < months.size(); iM++) {
 		UnicodeString name = months[iM].Name.UpperCase();
 		int nCount = 0;
 		for (unsigned int iC = 0; iC < newclasses.size(); iC++) {
@@ -789,18 +803,22 @@ void __fastcall TForm1::actRedesignClassificationsExecute(TObject *Sender)
     Log->Lines->Add("Будет добавлено классификаций: " + IntToStr(nAddClasses));
 	Log->Lines->Add("Всего классификаций: " + IntToStr((int)(newclasses.size())));
 
+
 	WriteClassifications(vSheet, newclasses);
 
+	lblStatus->Caption = "Сохраняю файл...";
 	Log->Lines->Add("Сохраняю файл...");
 	try {
 		app.OlePropertySet("DisplayAlerts",false);
 		excel.OleProcedure("SaveAs", WideString(m_strFileName.c_str()));
 		Log->Lines->Add("Данные сохранены!");
 	} catch (...) {
+		lblStatus->Caption = "Ошибка: Пожалуйста закройте все открытые копии файла и повторите операцию";
 		Log->Lines->Add("Ошибка: Пожалуйста закройте все открытые копии файла и повторите операцию");
 	}
     ProgressBar1->Position = 0;
 	app.OleProcedure("Quit");
+	lblStatus->Caption = "";
 }
 //---------------------------------------------------------------------------
 
@@ -843,6 +861,12 @@ void __fastcall TForm1::actSortClassificationsExecute(TObject *Sender)
 		Log->Lines->Add("Ошибка: Пожалуйста закройте все открытые копии файла и повторите операцию");
 	}
 	app.OleProcedure("Quit");
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::FormCreate(TObject *Sender)
+{
+	lblStatus->Caption = "";
 }
 //---------------------------------------------------------------------------
 

@@ -60,6 +60,7 @@ __published:	// IDE-managed Components
 	TGroupBox *GroupBox2;
 	TButton *btnRedesignClassifications;
 	TButton *btnSortClassifications;
+	TLabel *lblStatus;
 	void __fastcall Button1Click(TObject *Sender);
 	void __fastcall actCalcClassificationExecute(TObject *Sender);
 	void __fastcall actCalcClassificationUpdate(TObject *Sender);
@@ -69,6 +70,7 @@ __published:	// IDE-managed Components
 	void __fastcall actRedesignClassificationsExecute(TObject *Sender);
 	void __fastcall actSortClassificationsUpdate(TObject *Sender);
 	void __fastcall actSortClassificationsExecute(TObject *Sender);
+	void __fastcall FormCreate(TObject *Sender);
 private:	// User declarations
 	UnicodeString m_sUnknownClass;
 	int m_nPageClassification;

@@ -2,7 +2,7 @@ object Form1: TForm1
   Left = 0
   Top = 0
   Caption = #1044#1086#1084#1072#1096#1085#1103#1103' '#1073#1091#1093#1075#1072#1083#1090#1077#1088#1080#1103' ('#1074#1089#1087#1086#1084#1086#1075#1072#1090#1077#1083#1100#1085#1072#1103' '#1087#1088#1086#1075#1088#1072#1084#1084#1072')'
-  ClientHeight = 365
+  ClientHeight = 377
   ClientWidth = 922
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -12,11 +12,27 @@ object Form1: TForm1
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
+  OnCreate = FormCreate
   DesignSize = (
     922
-    365)
+    377)
   PixelsPerInch = 96
   TextHeight = 13
+  object lblStatus: TLabel
+    Left = 8
+    Top = 346
+    Width = 48
+    Height = 23
+    Anchors = [akLeft, akBottom]
+    Caption = '1111'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clRed
+    Font.Height = -19
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+    ExplicitTop = 334
+  end
   object edtFile: TEdit
     Left = 8
     Top = 8
@@ -41,20 +57,22 @@ object Form1: TForm1
     Left = 8
     Top = 139
     Width = 906
-    Height = 196
+    Height = 178
     Anchors = [akLeft, akTop, akRight, akBottom]
     Color = clBtnFace
     ReadOnly = True
     ScrollBars = ssVertical
     TabOrder = 2
+    ExplicitHeight = 166
   end
   object ProgressBar1: TProgressBar
     Left = 8
-    Top = 341
+    Top = 323
     Width = 906
     Height = 16
     Anchors = [akLeft, akRight, akBottom]
     TabOrder = 3
+    ExplicitTop = 311
   end
   object btnViewClassifications: TButton
     Left = 535
