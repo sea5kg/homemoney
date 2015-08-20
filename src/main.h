@@ -73,6 +73,8 @@ __published:	// IDE-managed Components
 	void __fastcall FormCreate(TObject *Sender);
 private:	// User declarations
 	UnicodeString m_sUnknownClass;
+	UnicodeString m_strDecDelim;
+	UnicodeString m_strNumberFormat;
 	int m_nPageClassification;
 	std::vector<exlSheet> m_vMonth;
 	bool m_bBackup;

@@ -63,7 +63,6 @@ object Form1: TForm1
     ReadOnly = True
     ScrollBars = ssVertical
     TabOrder = 2
-    ExplicitHeight = 166
   end
   object ProgressBar1: TProgressBar
     Left = 8
@@ -72,7 +71,6 @@ object Form1: TForm1
     Height = 16
     Anchors = [akLeft, akRight, akBottom]
     TabOrder = 3
-    ExplicitTop = 311
   end
   object btnViewClassifications: TButton
     Left = 535

@@ -19,6 +19,8 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	: TForm(Owner)
 {
 	m_sUnknownClass = "неизвестно";
+	m_strDecDelim = UnicodeString(FormatSettings.DecimalSeparator);
+	m_strNumberFormat = "# ##0" + m_strDecDelim + "00р.";
 }
 //---------------------------------------------------------------------------
 void __fastcall TForm1::Button1Click(TObject *Sender)
@@ -351,6 +353,7 @@ void __fastcall TForm1::actCalcClassificationExecute(TObject *Sender)
 	}
 
 	Variant app = Variant::CreateObject("Excel.Application");
+	app.OlePropertySet("Visible", true);
 	Variant excel = app.OlePropertyGet("Workbooks").OleFunction("Open", WideString(m_strFileName.c_str()));
 	Variant vSheets = excel.OlePropertyGet("Worksheets");
 	Variant vSheet = vSheets.OlePropertyGet("Item",m_nPageClassification);
@@ -533,7 +536,7 @@ void __fastcall TForm1::actCalcClassificationExecute(TObject *Sender)
 			vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,11).OlePropertySet("Value", WideString(vSumClasses[i].Name));
 			vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,12).OlePropertySet("Value", WideString(vSumClasses[i].Sum));
 
-			vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,12).OlePropertySet("NumberFormat", WideString("#,##0.00 р."));
+			vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,12).OlePropertySet("NumberFormat", WideString(m_strNumberFormat));
 
 			setBorders(vSheetMonth, nRow, 11);
 			setBorders(vSheetMonth, nRow, 12);
@@ -543,13 +546,13 @@ void __fastcall TForm1::actCalcClassificationExecute(TObject *Sender)
 
 		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,11).OlePropertySet("Value", WideString("Итого:"));
 		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,12).OlePropertySet("Value", WideString(nSum));
-		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,12).OlePropertySet("NumberFormat", WideString("#,##0.00 р."));
+		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,12).OlePropertySet("NumberFormat", WideString(m_strNumberFormat));
 
 		nRow++;
 
 		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,11).OlePropertySet("Value", WideString("Сумма сумм по дням:"));
 		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,12).OlePropertySet("Value", WideString(fSumSum));
-		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,12).OlePropertySet("NumberFormat", WideString("#,##0.00 р."));
+		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,12).OlePropertySet("NumberFormat", WideString(m_strNumberFormat));
 	}
 
 	{
@@ -566,7 +569,7 @@ void __fastcall TForm1::actCalcClassificationExecute(TObject *Sender)
 		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,17).OlePropertyGet("Font").OlePropertySet("Bold", true);
 
 		vSheetMonth.OlePropertyGet("Columns", WideString("N")).OlePropertySet("ColumnWidth", 20);
-		vSheetMonth.OlePropertyGet("Columns", WideString("O")).OlePropertySet("ColumnWidth", 35);
+		vSheetMonth.OlePropertyGet("Columns", WideString("O")).OlePropertySet("ColumnWidth", 50);
 		vSheetMonth.OlePropertyGet("Columns", WideString("P")).OlePropertySet("ColumnWidth", 15);
 		vSheetMonth.OlePropertyGet("Columns", WideString("Q")).OlePropertySet("ColumnWidth", 50);
 
@@ -590,12 +593,15 @@ void __fastcall TForm1::actCalcClassificationExecute(TObject *Sender)
 			vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,14).OlePropertySet("Value", WideString(months[i].Class));
 			vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,15).OlePropertySet("Value", WideString(months[i].Name));
 			vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,16).OlePropertySet("Value", WideString(months[i].Price));
-			vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,17).OlePropertySet("Value", WideString(months[i].LinkToClassification));
+			vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,16).OlePropertySet("NumberFormat", WideString(m_strNumberFormat));
 
 			if (months[i].Price < 0) {
 				setColor(vSheetMonth, nRow, 16, RGBToInt(240, 230, 140));
-            }
-			vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,16).OlePropertySet("NumberFormat", WideString("#,##0.00 р."));
+			}
+
+
+			// TODO: check linkt to classification
+			// vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,17).OlePropertySet("Value", WideString(months[i].LinkToClassification.c_str()));
 
 			setBorders(vSheetMonth, nRow, 14);
 			setBorders(vSheetMonth, nRow, 15);
@@ -607,10 +613,8 @@ void __fastcall TForm1::actCalcClassificationExecute(TObject *Sender)
 
 		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,14).OlePropertySet("Value", WideString("Итого:"));
 		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,16).OlePropertySet("Value", WideString(nSum));
-		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,16).OlePropertySet("NumberFormat", WideString("#,##0.00 р."));
-
-
-		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,17).OlePropertySet("NumberFormat", WideString("#,##0.00 р."));
+		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,16).OlePropertySet("NumberFormat", WideString(m_strNumberFormat));
+		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,17).OlePropertySet("NumberFormat", WideString(m_strNumberFormat));
 	}
 
 	Log->Lines->Add("Сохраняю файл...");
@@ -711,6 +715,7 @@ void __fastcall TForm1::actRedesignClassificationsExecute(TObject *Sender)
 
 	lblStatus->Caption = "Открываю файл на чтение...";
 	Variant app = Variant::CreateObject("Excel.Application");
+    app.OlePropertySet("Visible", true);
 	Variant excel = app.OlePropertyGet("Workbooks").OleFunction("Open", WideString(m_strFileName.c_str()));
 	Variant vSheets = excel.OlePropertyGet("Worksheets");
 	Variant vSheet = vSheets.OlePropertyGet("Item",m_nPageClassification);
@@ -836,6 +841,7 @@ void __fastcall TForm1::actSortClassificationsExecute(TObject *Sender)
 	}
 
 	Variant app = Variant::CreateObject("Excel.Application");
+	app.OlePropertySet("Visible", true);
 	Variant excel = app.OlePropertyGet("Workbooks").OleFunction("Open", WideString(m_strFileName.c_str()));
 	Variant vSheets = excel.OlePropertyGet("Worksheets");
 
