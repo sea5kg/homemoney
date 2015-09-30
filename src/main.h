@@ -89,6 +89,7 @@ private:	// User declarations
 	void clearCell(Variant &vSheet, int nRow, int nCol);
 	int RGBToInt(int r, int g, int b);
     UnicodeString createHyperLinkToClassification(std::vector<exlClass> &classes, int nLine);
+	UnicodeString m_strRecomendations;
 
 public:		// User declarations
 	__fastcall TForm1(TComponent* Owner);

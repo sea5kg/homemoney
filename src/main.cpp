@@ -148,8 +148,18 @@ void TForm1::ReadClassifications(Variant &vSheet, std::vector<exlClass> &classes
 		if (!cl.Name.Trim().IsEmpty()) {
 			if (cl.Class.Trim().IsEmpty()) {
 			  cl.Class = m_sUnknownClass;
+			}
+			bool bFound = false;
+			for (int s = 0; s < classes.size(); s++) {
+				if (classes[s].Name.UpperCase() == cl.Name.UpperCase()) {
+					bFound = true;
+				}
+			}
+			if (!bFound) {
+				classes.push_back(cl);
+			} else {
+				Log->Lines->Add("При считывании найден дубликат - проигнорирован: [" + cl.Name + "]");
             }
-			classes.push_back(cl);
 		}
 	}
 	lblStatus->Caption = "Готово";
@@ -712,6 +722,7 @@ void __fastcall TForm1::actRedesignClassificationsExecute(TObject *Sender)
 		lblStatus->Caption = "Ошибка: Не удалось создать резервную копию файла";
 		return;
 	}
+	m_strRecomendations = "";
 
 	lblStatus->Caption = "Открываю файл на чтение...";
 	Variant app = Variant::CreateObject("Excel.Application");
