@@ -400,7 +400,7 @@ void __fastcall TForm1::actCalcClassificationExecute(TObject *Sender)
 		int nFound = 0;
 		nSumHand += months[i].Price;
 		for (unsigned int iC = 0; iC < classes.size(); iC++) {
-			if (nFound == 0 && classes[iC].Name == months[i].Name) {
+			if (nFound == 0 && classes[iC].Name.UpperCase() == months[i].Name.UpperCase()) {
 				months[i].Class = classes[iC].Class;
 				months[i].LinkToClassification = createHyperLinkToClassification(classes, iC);
 				nFound++;
@@ -412,7 +412,7 @@ void __fastcall TForm1::actCalcClassificationExecute(TObject *Sender)
 
 		nFound = 0;
 		for (unsigned int iC = 0; iC < vSumClasses.size(); iC++) {
-			if (vSumClasses[iC].Name == months[i].Class) {
+			if (vSumClasses[iC].Name.UpperCase() == months[i].Class.UpperCase()) {
 				vSumClasses[iC].Sum += months[i].Price;
 				nFound++;
 			}
