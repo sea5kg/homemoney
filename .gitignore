@@ -33,3 +33,5 @@
 
 bin/
 src/Win32
+Win32
+Win64x
