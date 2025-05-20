@@ -83,7 +83,7 @@ private:	// User declarations
 	void ReadClassifications(Variant &vSheet, std::vector<exlClass> &classes);
 	void WriteClassifications(Variant &vSheet, std::vector<exlClass> &classes);
 	void ReadMonth(Variant &vSheet, std::vector<exlMonth> &month);
-	void ReadMonthSum(Variant &vSheet, double &sum);
+	bool ReadMonthSum(Variant &vSheet, double &sum);
 	void setBorders(Variant &vSheet, int nRow, int nCol);
 	void setColor(Variant &vSheet, int nRow, int nCol, int nColor);
 	void clearCell(Variant &vSheet, int nRow, int nCol);
