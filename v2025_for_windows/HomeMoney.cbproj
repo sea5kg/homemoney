@@ -177,9 +177,6 @@
             <DependentOn>classeditor.h</DependentOn>
             <BuildOrder>4</BuildOrder>
         </CppCompile>
-        <CppCompile Include="ExcelApp.cpp">
-            <BuildOrder>0</BuildOrder>
-        </CppCompile>
         <CppCompile Include="helpers.cpp">
             <DependentOn>helpers.h</DependentOn>
             <BuildOrder>3</BuildOrder>
@@ -204,7 +201,6 @@
             <BuildOrder>5</BuildOrder>
         </CppCompile>
         <CppCompile Include="src\ExcelApp.cpp">
-            <Suffix>_0</Suffix>
             <BuildOrder>7</BuildOrder>
         </CppCompile>
         <None Include="src\ExcelApp.h">
