@@ -35,3 +35,5 @@ bin/
 src/Win32
 Win32
 Win64x
+__history
+__recovery

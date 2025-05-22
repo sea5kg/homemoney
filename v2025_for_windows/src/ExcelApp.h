@@ -8,7 +8,8 @@ class ExcelApp {
     public:
         ExcelApp();
         ~ExcelApp();
-        bool open(UnicodeString strFileName);
+		bool open(const UnicodeString &sFileName, UnicodeString &sErrorMessage);
+        Variant sheets();
 
     private:
         bool m_bOpened;

@@ -7,6 +7,7 @@
 
 #include <map>
 
+#include "ExcelApp.h"
 #include "main.h"
 #include "classeditor.h"
 #include "selectclass.h"
@@ -30,33 +31,18 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
 	if (OpenDialog1->Execute()) {
 		m_bBackup = false;
 
-		UnicodeString strFileName = OpenDialog1->FileName;
-		if (! FileExists (strFileName)) {
-			MessageBox (Handle, UnicodeString(L"Файл '" + strFileName + L"' не существует").c_str(), L"prompt", MB_OK);
+		UnicodeString sFileName = OpenDialog1->FileName;
+		ExcelApp app;
+		UnicodeString sErrorMessage;
+		if (!app.open(sFileName, sErrorMessage)) {
+            MessageBox (Handle, sErrorMessage.c_str(), L"prompt", MB_OK);
 			edtFile->Text = "";
 			return;
 		}
 
-		edtFile->Text = strFileName;
-		// TODO: create backup now or later?
-		// TODO: INIT OPERATIONS
-		// TODO: scan month
-		Variant var_Book,var_Sheet,var_Cell;
-
-		Variant app = Variant::CreateObject("Excel.Application");
-		// app.OlePropertySet("Visible",false);
-		Variant excel;
-		try {
-			excel = app.OlePropertyGet("Workbooks").OleFunction("Open", WideString(strFileName.c_str()));
-		} catch (...) {
-			MessageBox (Handle, UnicodeString(L"Не получается открыть файл '" + strFileName + L"' как excel").c_str(), L"prompt", MB_OK);
-			app.OleProcedure("Quit");
-			edtFile->Text = "";
-			return;
-		}
-
+		edtFile->Text = sFileName;
 		Log->Lines->Add(L"Файл загружен производиться анализ");
-		Variant vSheets = excel.OlePropertyGet("Worksheets");
+		Variant vSheets = app.sheets();
 
 		m_nPageClassification = 0;
 		m_vMonth.clear();
@@ -83,19 +69,16 @@ void __fastcall TForm1::Button1Click(TObject *Sender)
 
 		if (m_nPageClassification == 0) {
 			MessageBox(Handle, UnicodeString(L"Не найден лист 'классификации'").c_str(), L"prompt", MB_OK);
-			app.OleProcedure("Quit");
 			edtFile->Text = "";
 			return;
 		}
 
 		if (m_vMonth.size() == 0) {
 			MessageBox (Handle, UnicodeString(L"Не найден ни один лист с 'месяц xx'").c_str(), L"prompt", MB_OK);
-			app.OleProcedure("Quit");
 			edtFile->Text = "";
 			return;
-        }
-		app.OleProcedure("Quit");
-		m_strFileName = strFileName;
+		}
+		m_strFileName = sFileName;
     }
 }
 //---------------------------------------------------------------------------

@@ -5,8 +5,8 @@
 #include <tchar.h>
 //---------------------------------------------------------------------------
 USEFORM("main.cpp", Form1);
-USEFORM("classeditor.cpp", FormClassEditor);
 USEFORM("SelectClass.cpp", FormSelectClass);
+USEFORM("classeditor.cpp", FormClassEditor);
 //---------------------------------------------------------------------------
 int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
 {
