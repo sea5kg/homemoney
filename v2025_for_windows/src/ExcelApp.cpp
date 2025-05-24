@@ -8,8 +8,11 @@ ExcelApp::ExcelApp() {
 
 ExcelApp::~ExcelApp() {
 	if (m_bOpened) {
-     	m_app.OleProcedure("Quit");
-    }
+		try {
+			m_app.OleProcedure("Quit");
+		} catch (...) {
+		}
+	}
 }
 
 bool ExcelApp::open(const UnicodeString &sFileName, UnicodeString &sErrorMessage) {

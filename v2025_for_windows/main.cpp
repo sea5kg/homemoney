@@ -216,7 +216,7 @@ void TForm1::WriteClassifications(Variant &vSheet, std::vector<exlClass> &classe
 
 //---------------------------------------------------------------------------
 
-void TForm1::ReadMonth(Variant &vSheet, std::vector<exlMonth> &month)
+void TForm1::ReadMonth(Variant &vSheet, std::vector<ExcelMonthItem> &month)
 {
 	UnicodeString strPageName = vSheet.OlePropertyGet("Name");
 	int nRowsCount = vSheet.OlePropertyGet("Cells").OlePropertyGet("Rows").OlePropertyGet("Count");
@@ -231,7 +231,7 @@ void TForm1::ReadMonth(Variant &vSheet, std::vector<exlMonth> &month)
 		ProgressBar1->Position = i;
 		Application->ProcessMessages();
 
-		exlMonth mon;
+		ExcelMonthItem mon;
 		mon.Month = strPageName;
 		mon.Name = vSheet.OlePropertyGet("Cells").OlePropertyGet("Item",i+1,3).OlePropertyGet("Value");
 		if (!mon.Name.Trim().IsEmpty()) {
@@ -265,7 +265,7 @@ bool TForm1::ReadMonthSum(Variant &vSheet, double &sum)
 		ProgressBar1->Position = i;
 		Application->ProcessMessages();
 
-		exlMonth mon;
+		ExcelMonthItem mon;
 		mon.Month = strPageName;
 		mon.Name = vSheet.OlePropertyGet("Cells").OlePropertyGet("Item",i+1,3).OlePropertyGet("Value");
 		if (mon.Name.Trim().IsEmpty()) {
@@ -305,6 +305,11 @@ void TForm1::setBorders(Variant &vSheet, int nRow, int nCol) {
 	vSheet.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,nCol).OlePropertyGet("Borders").OlePropertySet("LineStyle", xlContinuous);
 }
 
+void TForm1::setBordersBold(Variant &vSheet, int nRow, int nCol) {
+	vSheet.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,nCol).OlePropertyGet("Borders").OlePropertySet("LineStyle", xlContinuous);
+	vSheet.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,nCol).OlePropertyGet("Borders").OlePropertySet("Weight", xlMedium);
+}
+
 void TForm1::clearCell(Variant &vSheet, int nRow, int nCol) {
 	vSheet.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,nCol).OlePropertySet("Value", WideString(""));
 }
@@ -332,28 +337,28 @@ void TForm1::SetSafeFocusOnMainWinow() {
 	}
 }
 
-void TForm1::sort(std::vector<exlMonth> &months) {
+void TForm1::sort(std::vector<ExcelMonthItem> &months) {
 	ProgressBar1->Max = 100;
 	ProgressBar1->Min = 0;
 	ProgressBar1->Position = 0;
 
-//	{
-//		int nPermutation = 1;
-//		while (nPermutation > 0) {
-//			nPermutation = 0;
-//			for (unsigned int iC = 0; iC < vSumClasses.size()-1; iC++) {
-//				ProgressBar1->Position = (ProgressBar1->Position+1) % ProgressBar1->Max;
-//				Application->ProcessMessages();
-//				if (vSumClasses[iC].Name.UpperCase() > vSumClasses[iC+1].Name.UpperCase()) {
-//					exlSumClass buf = vSumClasses[iC];
-//					vSumClasses[iC] = vSumClasses[iC+1];
-//					vSumClasses[iC+1] = buf;
-//					nPermutation++;
-//				}
-//			}
-//		}
-//		ProgressBar1->Position = 0;
-//	}
+	{
+		int nPermutation = 1;
+		while (nPermutation > 0) {
+			nPermutation = 0;
+			for (unsigned int iC = 0; iC < months.size()-1; iC++) {
+				ProgressBar1->Position = (ProgressBar1->Position+1) % ProgressBar1->Max;
+				Application->ProcessMessages();
+				if (months[iC].Class.UpperCase() > months[iC+1].Class.UpperCase()) {
+					ExcelMonthItem buf = months[iC];
+					months[iC] = months[iC+1];
+					months[iC+1] = buf;
+					nPermutation++;
+				}
+			}
+		}
+		ProgressBar1->Position = 0;
+	}
 }
 
 //---------------------------------------------------------------------------
@@ -412,7 +417,7 @@ void __fastcall TForm1::actCalcClassificationExecute(TObject *Sender)
 	std::vector<exlClass> classes;
 	ReadClassifications(vSheet, classes);
 
-	std::vector<exlMonth> months;
+	std::vector<ExcelMonthItem> months;
 	Variant vSheetMonth;
 	double fSumSum = 0;
 	for (unsigned int i = 0; i < m_vMonth.size(); i++) {
@@ -588,7 +593,6 @@ void __fastcall TForm1::actCalcClassificationExecute(TObject *Sender)
 			nSum += vSumClasses[i].Sum;
 			vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,11).OlePropertySet("Value", WideString(vSumClasses[i].Name));
 			vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,12).OlePropertySet("Value", WideString(vSumClasses[i].Sum));
-
 			vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,12).OlePropertySet("NumberFormat", WideString(m_strNumberFormat));
 
 			setBorders(vSheetMonth, nRow, 11);
@@ -612,7 +616,6 @@ void __fastcall TForm1::actCalcClassificationExecute(TObject *Sender)
 	sort(months);
     Log->Lines->Add(L"Готово.");
 
-	// TODO sort and calc summ by classifiacation
 	{
 		double nSum = 0;
 		int nRow = 2;
@@ -638,10 +641,30 @@ void __fastcall TForm1::actCalcClassificationExecute(TObject *Sender)
 
 		ProgressBar1->Max = months.size();
 		ProgressBar1->Min = 0;
+		UnicodeString sLastClass = L"";
+		double nSummByClass = 0.0f;
 		for (unsigned int i = 0; i < months.size(); i++) {
 			nRow++;
 			ProgressBar1->Position = i;
 			nSum += months[i].Price;
+
+			if (sLastClass != months[i].Class && sLastClass == L"") {
+                // first class
+				sLastClass = months[i].Class;
+			}
+
+			if (sLastClass != months[i].Class && sLastClass != L"") {
+			  setBordersBold(vSheetMonth, nRow, 17);
+			  vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,17).OlePropertyGet("Font").OlePropertySet("Bold", true);
+              vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,17).OlePropertySet("Value", WideString(nSummByClass));
+			  vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,17).OlePropertySet("NumberFormat", WideString(m_strNumberFormat));
+
+			  nRow++;
+			  sLastClass = months[i].Class;
+              nSummByClass = 0.0f;
+            }
+
+			nSummByClass += months[i].Price;
 
 			vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,14).OlePropertySet("Value", WideString(months[i].Class));
 			vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,15).OlePropertySet("Value", WideString(months[i].Name));
@@ -663,6 +686,13 @@ void __fastcall TForm1::actCalcClassificationExecute(TObject *Sender)
 		}
 		nRow++;
 		ProgressBar1->Position = 0;
+
+		setBordersBold(vSheetMonth, nRow, 17);
+		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,17).OlePropertyGet("Font").OlePropertySet("Bold", true);
+		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,17).OlePropertySet("Value", WideString(nSummByClass));
+		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,17).OlePropertySet("NumberFormat", WideString(m_strNumberFormat));
+
+		nRow++;
 
 		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,14).OlePropertySet("Value", WideString(L"Итого:"));
 		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,16).OlePropertySet("Value", WideString(nSum));
@@ -781,7 +811,7 @@ void __fastcall TForm1::actRedesignClassificationsExecute(TObject *Sender)
 	std::vector<exlClass> classes;
 	ReadClassifications(vSheet, classes);
 
-	std::vector<exlMonth> months;
+	std::vector<ExcelMonthItem> months;
 	for (unsigned int i = 0; i < m_vMonth.size(); i++) {
 		int nMonthPage = m_vMonth[i].Number;
 		Variant vSheetMonth = vSheets.OlePropertyGet("Item",nMonthPage);

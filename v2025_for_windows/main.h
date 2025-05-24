@@ -9,13 +9,13 @@
 #include <Vcl.Forms.hpp>
 #include <Vcl.Dialogs.hpp>
 #include "helpers.h"
+#include "ExcelMonthItem.h"
 #include <Vcl.ComCtrls.hpp>
 #include <System.Actions.hpp>
 #include <Vcl.ActnList.hpp>
 #include <vector>
-#include      <ComObj.hpp>
-#include      <utilcls.h>
-
+#include <ComObj.hpp>
+#include <utilcls.h>
 
 const int xlContinuous = 1;
 const int xlUp = 3;
@@ -82,15 +82,16 @@ private:	// User declarations
 	bool MakeBackup();
 	void ReadClassifications(Variant &vSheet, std::vector<exlClass> &classes);
 	void WriteClassifications(Variant &vSheet, std::vector<exlClass> &classes);
-	void ReadMonth(Variant &vSheet, std::vector<exlMonth> &month);
+	void ReadMonth(Variant &vSheet, std::vector<ExcelMonthItem> &month);
 	bool ReadMonthSum(Variant &vSheet, double &sum);
 	void setBorders(Variant &vSheet, int nRow, int nCol);
+	void setBordersBold(Variant &vSheet, int nRow, int nCol);
 	void setColor(Variant &vSheet, int nRow, int nCol, int nColor);
 	void clearCell(Variant &vSheet, int nRow, int nCol);
 	int RGBToInt(int r, int g, int b);
 	void ShowErr(const UnicodeString &sErrorMessage);
 	void SetSafeFocusOnMainWinow();
-    void sort(std::vector<exlMonth> &months);
+    void sort(std::vector<ExcelMonthItem> &months);
 	UnicodeString createHyperLinkToClassification(std::vector<exlClass> &classes, int nLine);
 	UnicodeString m_strRecomendations;
 
