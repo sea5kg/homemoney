@@ -112,9 +112,12 @@
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
         <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
         <BCC_PCHName_Clang>HomeMoneyPCH1.h</BCC_PCHName_Clang>
-        <OutputExt>x64_20250521.exe</OutputExt>
+        <OutputExt>x64_20250524.exe</OutputExt>
         <BCC_EnableBatchCompilation>true</BCC_EnableBatchCompilation>
         <UsePackages>false</UsePackages>
+        <Icon_MainIcon>HomeMoney_Icon.ico</Icon_MainIcon>
+        <UWP_CppLogo44>..\logo\logo_50x50.png</UWP_CppLogo44>
+        <UWP_CppLogo150>..\logo\logo_150x150.png</UWP_CppLogo150>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1)'!=''">
         <BCC_OptimizeForSpeed>false</BCC_OptimizeForSpeed>
@@ -152,6 +155,7 @@
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <LinkPackageStatics>rtl.lib;vcl.lib</LinkPackageStatics>
         <DynamicRTL>false</DynamicRTL>
+        <OutputExt>x64_20250524.exe</OutputExt>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <Defines>NDEBUG;$(Defines)</Defines>
@@ -205,6 +209,12 @@
         </CppCompile>
         <None Include="src\ExcelApp.h">
             <BuildOrder>8</BuildOrder>
+        </None>
+        <CppCompile Include="src\ExcelMonthItem.cpp">
+            <BuildOrder>8</BuildOrder>
+        </CppCompile>
+        <None Include="src\ExcelMonthItem.h">
+            <BuildOrder>9</BuildOrder>
         </None>
         <FormResources Include="main.dfm"/>
         <FormResources Include="SelectClass.dfm"/>
@@ -335,6 +345,20 @@
                 <DeployFile LocalName="..\bin\HomeMoney.x64_20250521.pdb" Configuration="Debug" Class="DebugSymbols">
                     <Platform Name="Win64x">
                         <RemoteName>HomeMoney.pdb</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="..\logo\logo_150x150.png" Configuration="Debug" Class="UWP_CppLogo150">
+                    <Platform Name="Win64x">
+                        <RemoteDir>Assets\</RemoteDir>
+                        <RemoteName>Logo150x150.png</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="..\logo\logo_50x50.png" Configuration="Debug" Class="UWP_CppLogo44">
+                    <Platform Name="Win64x">
+                        <RemoteDir>Assets\</RemoteDir>
+                        <RemoteName>Logo44x44.png</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
