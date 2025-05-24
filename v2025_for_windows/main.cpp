@@ -9,6 +9,7 @@
 
 #include "ExcelApp.h"
 #include "main.h"
+#include "winuser.h"
 #include "classeditor.h"
 #include "selectclass.h"
 //---------------------------------------------------------------------------
@@ -304,23 +305,55 @@ void TForm1::setBorders(Variant &vSheet, int nRow, int nCol) {
 	vSheet.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,nCol).OlePropertyGet("Borders").OlePropertySet("LineStyle", xlContinuous);
 }
 
-//---------------------------------------------------------------------------
-
 void TForm1::clearCell(Variant &vSheet, int nRow, int nCol) {
 	vSheet.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,nCol).OlePropertySet("Value", WideString(""));
 }
-
-//---------------------------------------------------------------------------
 
 void TForm1::setColor(Variant &vSheet, int nRow, int nCol, int nColor) {
 	vSheet.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,nCol).OlePropertyGet("Interior").OlePropertySet("Color", nColor);
 }
 
-//---------------------------------------------------------------------------
-
 int TForm1::RGBToInt(int r, int g, int b) {
 	TColor cl = (TColor) RGB (r, g, b);
 	return cl;
+}
+
+void TForm1::ShowErr(const UnicodeString &sErrorMessage) {
+	Log->Lines->Add(sErrorMessage);
+	MessageBox (Handle, sErrorMessage.c_str(), L"prompt", MB_OK);
+	lblStatus->Caption = sErrorMessage;
+}
+
+void TForm1::SetSafeFocusOnMainWinow() {
+	HWND hWnd = this->Handle;
+	bool parentIsVisible = IsWindowVisible(Handle);
+	if (this->Enabled && this->Visible && parentIsVisible) {
+        this->SetFocus();
+	}
+}
+
+void TForm1::sort(std::vector<exlMonth> &months) {
+	ProgressBar1->Max = 100;
+	ProgressBar1->Min = 0;
+	ProgressBar1->Position = 0;
+
+//	{
+//		int nPermutation = 1;
+//		while (nPermutation > 0) {
+//			nPermutation = 0;
+//			for (unsigned int iC = 0; iC < vSumClasses.size()-1; iC++) {
+//				ProgressBar1->Position = (ProgressBar1->Position+1) % ProgressBar1->Max;
+//				Application->ProcessMessages();
+//				if (vSumClasses[iC].Name.UpperCase() > vSumClasses[iC+1].Name.UpperCase()) {
+//					exlSumClass buf = vSumClasses[iC];
+//					vSumClasses[iC] = vSumClasses[iC+1];
+//					vSumClasses[iC+1] = buf;
+//					nPermutation++;
+//				}
+//			}
+//		}
+//		ProgressBar1->Position = 0;
+//	}
 }
 
 //---------------------------------------------------------------------------
@@ -355,20 +388,24 @@ UnicodeString TForm1::createHyperLinkToClassification(std::vector<exlClass> &cla
 void __fastcall TForm1::actCalcClassificationExecute(TObject *Sender)
 {
 	if(!MakeBackup()) {
-		Log->Lines->Add(L"Не удалось создать резервную копию файла");
+		ShowErr(L"Ошибка: Не удалось создать резервную копию файла");
 		return;
 	}
+    ExcelApp app;
+	UnicodeString sErrorMessage;
+	if (!app.open(m_strFileName, sErrorMessage)) {
+		ShowErr(sErrorMessage);
+		edtFile->Text = "";
+		return;
+	}
+	app.visible();
 
-	Variant app = Variant::CreateObject("Excel.Application");
-	app.OlePropertySet("Visible", true);
-	Variant excel = app.OlePropertyGet("Workbooks").OleFunction("Open", WideString(m_strFileName.c_str()));
-	Variant vSheets = excel.OlePropertyGet("Worksheets");
+	Variant vSheets = app.sheets();
 	Variant vSheet = vSheets.OlePropertyGet("Item",m_nPageClassification);
     vSheet.OleFunction("Select", true);
 	UnicodeString strPageName = vSheet.OlePropertyGet("Name");
 	if (strPageName.UpperCase() != UnicodeString(L"классификации").UpperCase()) {
-	   app.OleProcedure("Quit");
-	   MessageBox (Handle, UnicodeString(L"Не верное имя страницы").c_str(), L"prompt", MB_OK);
+	   ShowErr(L"Ошибка: Не верное имя страницы (классификации)");
 	   return;
 	};
 
@@ -383,6 +420,7 @@ void __fastcall TForm1::actCalcClassificationExecute(TObject *Sender)
 			int nMonthPage = m_vMonth[i].Number;
 			vSheetMonth = vSheets.OlePropertyGet("Item", nMonthPage);
 			vSheetMonth.OleFunction("Select", true);
+            SetSafeFocusOnMainWinow();
 			ReadMonth(vSheetMonth, months);
 			if (!ReadMonthSum(vSheetMonth, fSumSum)) {
                 return;
@@ -570,34 +608,33 @@ void __fastcall TForm1::actCalcClassificationExecute(TObject *Sender)
 		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,12).OlePropertySet("NumberFormat", WideString(m_strNumberFormat));
 	}
 
-	// TODO sort and calc summ ny classifiacation
+	Log->Lines->Add(L"Сортирую...");
+	sort(months);
+    Log->Lines->Add(L"Готово.");
+
+	// TODO sort and calc summ by classifiacation
 	{
 		double nSum = 0;
 		int nRow = 2;
 		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,14).OlePropertySet("Value", WideString(L"Класс"));
 		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,15).OlePropertySet("Value", WideString(L"Наименование"));
 		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,16).OlePropertySet("Value", WideString(L"Цена"));
-		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,17).OlePropertySet("Value", WideString(L"Ссылка"));
 
 		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,14).OlePropertyGet("Font").OlePropertySet("Bold", true);
 		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,15).OlePropertyGet("Font").OlePropertySet("Bold", true);
 		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,16).OlePropertyGet("Font").OlePropertySet("Bold", true);
-		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,17).OlePropertyGet("Font").OlePropertySet("Bold", true);
 
 		vSheetMonth.OlePropertyGet("Columns", WideString("N")).OlePropertySet("ColumnWidth", 20);
 		vSheetMonth.OlePropertyGet("Columns", WideString("O")).OlePropertySet("ColumnWidth", 50);
 		vSheetMonth.OlePropertyGet("Columns", WideString("P")).OlePropertySet("ColumnWidth", 15);
-		vSheetMonth.OlePropertyGet("Columns", WideString("Q")).OlePropertySet("ColumnWidth", 50);
 
 		setBorders(vSheetMonth, nRow, 14);
 		setBorders(vSheetMonth, nRow, 15);
 		setBorders(vSheetMonth, nRow, 16);
-		setBorders(vSheetMonth, nRow, 17);
 
 		setColor(vSheetMonth, nRow, 14, RGBToInt(240, 230, 140));
 		setColor(vSheetMonth, nRow, 15, RGBToInt(240, 230, 140));
 		setColor(vSheetMonth, nRow, 16, RGBToInt(240, 230, 140));
-		setColor(vSheetMonth, nRow, 17, RGBToInt(240, 230, 140));
 
 		ProgressBar1->Max = months.size();
 		ProgressBar1->Min = 0;
@@ -622,7 +659,7 @@ void __fastcall TForm1::actCalcClassificationExecute(TObject *Sender)
 			setBorders(vSheetMonth, nRow, 14);
 			setBorders(vSheetMonth, nRow, 15);
 			setBorders(vSheetMonth, nRow, 16);
-			setBorders(vSheetMonth, nRow, 17);
+			// setBorders(vSheetMonth, nRow, 17);
 		}
 		nRow++;
 		ProgressBar1->Position = 0;
@@ -635,14 +672,13 @@ void __fastcall TForm1::actCalcClassificationExecute(TObject *Sender)
 
 	Log->Lines->Add(L"Сохраняю файл...");
 	try {
-		app.OlePropertySet("DisplayAlerts",false);
-		excel.OleProcedure("SaveAs", WideString(m_strFileName.c_str()));
+		app.save();
 		Log->Lines->Add(L"Данные сохранены!");
 	} catch (...) {
-		Log->Lines->Add(L"Ошибка: Пожалуйста закройте все открытые копии файла и повторите операцию");
+		ShowErr(L"Ошибка: Пожалуйста закройте все открытые копии файла и повторите операцию");
+		return;
 	}
     ProgressBar1->Position = 0;
-	app.OleProcedure("Quit");
 }
 //---------------------------------------------------------------------------
 
@@ -661,7 +697,7 @@ void __fastcall TForm1::actViewClassificationsExecute(TObject *Sender)
 	UnicodeString strPageName = vSheet.OlePropertyGet("Name");
 	if (strPageName.UpperCase() != UnicodeString(L"классификации").UpperCase()) {
 	   app.OleProcedure("Quit");
-	   MessageBox (Handle, UnicodeString(L"Не верное имя страницы").c_str(), L"prompt", MB_OK);
+	   ShowErr(L"Ошибка: Не верное имя страницы");
 	   return;
 	};
 
@@ -724,8 +760,7 @@ void __fastcall TForm1::actRedesignClassificationsExecute(TObject *Sender)
 {
 	lblStatus->Caption = "";
 	if(!MakeBackup()) {
-		Log->Lines->Add(L"Не удалось создать резервную копию файла");
-		lblStatus->Caption = L"Ошибка: Не удалось создать резервную копию файла";
+		ShowErr(L"Ошибка: Не удалось создать резервную копию файла");
 		return;
 	}
 	m_strRecomendations = "";
@@ -739,8 +774,7 @@ void __fastcall TForm1::actRedesignClassificationsExecute(TObject *Sender)
 	UnicodeString strPageName = vSheet.OlePropertyGet("Name");
 	if (strPageName.UpperCase() != UnicodeString(L"классификации").UpperCase()) {
 		app.OleProcedure("Quit");
-		MessageBox (Handle, UnicodeString(L"Не верное имя страницы").c_str(), L"prompt", MB_OK);
-		lblStatus->Caption = L"Ошибка: Не верное имя страницы";
+		ShowErr(L"Ошибка: Не верное имя страницы");
 		return;
 	};
 
@@ -835,8 +869,7 @@ void __fastcall TForm1::actRedesignClassificationsExecute(TObject *Sender)
 		excel.OleProcedure("SaveAs", WideString(m_strFileName.c_str()));
 		Log->Lines->Add(L"Данные сохранены!");
 	} catch (...) {
-		lblStatus->Caption = L"Ошибка: Пожалуйста закройте все открытые копии файла и повторите операцию";
-		Log->Lines->Add(L"Ошибка: Пожалуйста закройте все открытые копии файла и повторите операцию");
+		ShowErr(L"Ошибка: Пожалуйста закройте все открытые копии файла и повторите операцию");
 	}
     ProgressBar1->Position = 0;
 	app.OleProcedure("Quit");
@@ -853,7 +886,7 @@ void __fastcall TForm1::actSortClassificationsUpdate(TObject *Sender)
 void __fastcall TForm1::actSortClassificationsExecute(TObject *Sender)
 {
 	if(!MakeBackup()) {
-		Log->Lines->Add(L"Ошибка: Не удалось создать резервную копию файла");
+		ShowErr(L"Ошибка: Не удалось создать резервную копию файла");
 		return;
 	}
 
@@ -881,7 +914,7 @@ void __fastcall TForm1::actSortClassificationsExecute(TObject *Sender)
 		excel.OleProcedure("SaveAs", WideString(m_strFileName.c_str()));
 		Log->Lines->Add(L"Классификации отсортированы!");
 	} catch (...) {
-		Log->Lines->Add(L"Ошибка: Пожалуйста закройте все открытые копии файла и повторите операцию");
+		ShowErr(L"Ошибка: Пожалуйста закройте все открытые копии файла и повторите операцию");
 	}
 	app.OleProcedure("Quit");
 }

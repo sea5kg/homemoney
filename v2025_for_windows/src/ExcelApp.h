@@ -9,10 +9,13 @@ class ExcelApp {
         ExcelApp();
         ~ExcelApp();
 		bool open(const UnicodeString &sFileName, UnicodeString &sErrorMessage);
-        Variant sheets();
+        void visible();
+		Variant sheets();
+        void save();
 
     private:
-        bool m_bOpened;
+		bool m_bOpened;
+        UnicodeString m_sFileName;
         Variant m_app;
         Variant m_excel;
         Variant m_vSheets;

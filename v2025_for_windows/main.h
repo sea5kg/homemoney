@@ -88,7 +88,10 @@ private:	// User declarations
 	void setColor(Variant &vSheet, int nRow, int nCol, int nColor);
 	void clearCell(Variant &vSheet, int nRow, int nCol);
 	int RGBToInt(int r, int g, int b);
-    UnicodeString createHyperLinkToClassification(std::vector<exlClass> &classes, int nLine);
+	void ShowErr(const UnicodeString &sErrorMessage);
+	void SetSafeFocusOnMainWinow();
+    void sort(std::vector<exlMonth> &months);
+	UnicodeString createHyperLinkToClassification(std::vector<exlClass> &classes, int nLine);
 	UnicodeString m_strRecomendations;
 
 public:		// User declarations

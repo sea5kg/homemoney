@@ -18,7 +18,7 @@ bool ExcelApp::open(const UnicodeString &sFileName, UnicodeString &sErrorMessage
 	}
 
 	if (!FileExists (sFileName)) {
-		sErrorMessage = L"Файл '" + sFileName + L"' не существует";
+		sErrorMessage = L"Ошибка: Файл '" + sFileName + L"' не существует";
 		return false;
 	}
 
@@ -26,17 +26,30 @@ bool ExcelApp::open(const UnicodeString &sFileName, UnicodeString &sErrorMessage
 	try {
 		m_excel = m_app.OlePropertyGet("Workbooks").OleFunction("Open", WideString(sFileName.c_str()));
 	} catch (...) {
-		sErrorMessage = L"Не получается открыть файл '" + sFileName + L"' как excel";
+		sErrorMessage = L"Ошибка: Не получается открыть файл '" + sFileName + L"' как excel";
 		m_app.OleProcedure("Quit");
 		// edtFile->Text = "";
 		return false;
 	}
 	m_bOpened = true;
+	m_sFileName = sFileName;
 	m_vSheets = m_excel.OlePropertyGet("Worksheets");
 	return true;
 }
 
+void ExcelApp::visible() {
+   if (!m_bOpened) {
+	   return;
+   }
+   m_app.OlePropertySet("Visible", true);
+}
+
 Variant ExcelApp::sheets() {
-    return m_vSheets;
+	return m_vSheets;
+}
+
+void ExcelApp::save() {
+    m_app.OlePropertySet("DisplayAlerts",false);
+	m_excel.OleProcedure("SaveAs", WideString(m_sFileName.c_str()));
 }
 
