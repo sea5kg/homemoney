@@ -20,9 +20,9 @@ TForm1 *Form1;
 __fastcall TForm1::TForm1(TComponent* Owner)
 	: TForm(Owner)
 {
-	m_sUnknownClass = "неизвестно";
+	m_sUnknownClass = L"неизвестно";
 	m_strDecDelim = UnicodeString(FormatSettings.DecimalSeparator);
-	m_strNumberFormat = "# ##0" + m_strDecDelim + "00р.";
+	m_strNumberFormat = L"#,##0.00\"р.\"";
 }
 //---------------------------------------------------------------------------
 void __fastcall TForm1::Button1Click(TObject *Sender)
@@ -392,6 +392,7 @@ UnicodeString TForm1::createHyperLinkToClassification(std::vector<exlClass> &cla
 
 void __fastcall TForm1::actCalcClassificationExecute(TObject *Sender)
 {
+    lblStatus->Caption = L"";
 	if(!MakeBackup()) {
 		ShowErr(L"Ошибка: Не удалось создать резервную копию файла");
 		return;
@@ -446,7 +447,6 @@ void __fastcall TForm1::actCalcClassificationExecute(TObject *Sender)
 		for (unsigned int iC = 0; iC < classes.size(); iC++) {
 			if (nFound == 0 && classes[iC].Name.UpperCase() == months[i].Name.UpperCase()) {
 				months[i].Class = classes[iC].Class;
-				months[i].LinkToClassification = createHyperLinkToClassification(classes, iC);
 				nFound++;
 			}
 		}

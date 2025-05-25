@@ -13,6 +13,5 @@ class ExcelMonthItem {
 		UnicodeString Class;
 		double Price;
 		UnicodeString Month;
-		UnicodeString LinkToClassification;
 };
 

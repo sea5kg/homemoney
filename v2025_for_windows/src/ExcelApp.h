@@ -13,7 +13,9 @@ class ExcelApp {
 		Variant sheets();
         void save();
 
-    private:
+	private:
+		void removeFilterDatabase();
+
 		bool m_bOpened;
         UnicodeString m_sFileName;
         Variant m_app;

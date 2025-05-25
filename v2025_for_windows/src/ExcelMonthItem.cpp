@@ -7,7 +7,6 @@ ExcelMonthItem::ExcelMonthItem() {
 	this->Class = L"-";
 	this->Price = 0.0f;
 	this->Month = L"-";
-	this->LinkToClassification = L"-";
 }
 
 ExcelMonthItem::~ExcelMonthItem() {

@@ -28,6 +28,7 @@ bool ExcelApp::open(const UnicodeString &sFileName, UnicodeString &sErrorMessage
 	m_app = Variant::CreateObject("Excel.Application");
 	try {
 		m_excel = m_app.OlePropertyGet("Workbooks").OleFunction("Open", WideString(sFileName.c_str()));
+        // removeFilterDatabase();
 	} catch (...) {
 		sErrorMessage = L"Ошибка: Не получается открыть файл '" + sFileName + L"' как excel";
 		m_app.OleProcedure("Quit");
@@ -52,7 +53,30 @@ Variant ExcelApp::sheets() {
 }
 
 void ExcelApp::save() {
-    m_app.OlePropertySet("DisplayAlerts",false);
+    removeFilterDatabase();
+	m_app.OlePropertySet("DisplayAlerts",false);
 	m_excel.OleProcedure("SaveAs", WideString(m_sFileName.c_str()));
+}
+
+
+void ExcelApp::removeFilterDatabase() {
+    Variant vNames = m_excel.OlePropertyGet(L"Names");
+	int count = vNames.OlePropertyGet(L"Count");
+	std::vector<Variant> vToRemove;
+	::OutputDebugStringW(UnicodeString(L"Count => " + UnicodeString(count)).c_str());
+	for (int i = 0; i < count; i++) {
+		Variant vName = vNames.OleFunction("Item", i+1);
+		UnicodeString name = vName.OlePropertyGet("Name");
+		if (name.Pos("_FilterDatabase") > 0) {
+			::OutputDebugStringW(UnicodeString(UnicodeString(i+1) + L" => " + name).c_str());
+			vToRemove.push_back(vName);
+//			vNames.OleFunction("Item", i+1).OleProcedure("Delete");
+		}
+
+	}
+
+	for (int i = 0; i < vToRemove.size(); i++) {
+		vToRemove[i].OleProcedure("Delete");
+	}
 }
 
