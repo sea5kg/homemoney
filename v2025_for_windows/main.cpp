@@ -12,6 +12,7 @@
 #include "winuser.h"
 #include "classeditor.h"
 #include "selectclass.h"
+#include "Registry.hpp"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
@@ -23,64 +24,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	m_sUnknownClass = L"неизвестно";
 	m_strDecDelim = UnicodeString(FormatSettings.DecimalSeparator);
 	m_strNumberFormat = L"#,##0.00\"р.\"";
-}
-//---------------------------------------------------------------------------
-void __fastcall TForm1::Button1Click(TObject *Sender)
-{
-	edtFile->Text = "";
-	m_strFileName = "";
-	if (OpenDialog1->Execute()) {
-		m_bBackup = false;
-
-		UnicodeString sFileName = OpenDialog1->FileName;
-		ExcelApp app;
-		UnicodeString sErrorMessage;
-		if (!app.open(sFileName, sErrorMessage)) {
-            MessageBox (Handle, sErrorMessage.c_str(), L"prompt", MB_OK);
-			edtFile->Text = "";
-			return;
-		}
-
-		edtFile->Text = sFileName;
-		Log->Lines->Add(L"Файл загружен производиться анализ");
-		Variant vSheets = app.sheets();
-
-		m_nPageClassification = 0;
-		m_vMonth.clear();
-		cmbMonth->Items->Clear();
-		cmbMonth->Items->Add("");
-		int nSheets = vSheets.OlePropertyGet("Count");
-		Log->Lines->Add(L"Всего листов: " + IntToStr(nSheets));
-		for (int i = 0; i < nSheets; i++) {
-			Variant vSheet = vSheets.OlePropertyGet("Item",i+1);
-			UnicodeString str = vSheet.OlePropertyGet("Name");
-            // ShowMessage(str);
-			if (str.UpperCase() == UnicodeString(L"классификации").UpperCase()) {
-				m_nPageClassification = i+1;
-			};
-			if (str.UpperCase().Pos(L"МЕСЯЦ ") > 0) {
-				cmbMonth->Items->Add(str);
-				exlSheet s;
-				s.Number = i+1;
-				s.Name = str;
-				m_vMonth.push_back(s);
-			}
-			Log->Lines->Add(L"Лист " + IntToStr(i+1) + L": " + str);
-		}
-
-		if (m_nPageClassification == 0) {
-			MessageBox(Handle, UnicodeString(L"Не найден лист 'классификации'").c_str(), L"prompt", MB_OK);
-			edtFile->Text = "";
-			return;
-		}
-
-		if (m_vMonth.size() == 0) {
-			MessageBox (Handle, UnicodeString(L"Не найден ни один лист с 'месяц xx'").c_str(), L"prompt", MB_OK);
-			edtFile->Text = "";
-			return;
-		}
-		m_strFileName = sFileName;
-    }
+	m_bUseNumberFormat = true;
 }
 //---------------------------------------------------------------------------
 
@@ -593,7 +537,9 @@ void __fastcall TForm1::actCalcClassificationExecute(TObject *Sender)
 			nSum += vSumClasses[i].Sum;
 			vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,11).OlePropertySet("Value", WideString(vSumClasses[i].Name));
 			vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,12).OlePropertySet("Value", WideString(vSumClasses[i].Sum));
-			vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,12).OlePropertySet("NumberFormat", WideString(m_strNumberFormat));
+			if (m_bUseNumberFormat) {
+				vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,12).OlePropertySet("NumberFormat", WideString(m_strNumberFormat));
+            }
 
 			setBorders(vSheetMonth, nRow, 11);
 			setBorders(vSheetMonth, nRow, 12);
@@ -603,13 +549,17 @@ void __fastcall TForm1::actCalcClassificationExecute(TObject *Sender)
 
 		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,11).OlePropertySet("Value", WideString(L"Итого:"));
 		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,12).OlePropertySet("Value", WideString(nSum));
-		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,12).OlePropertySet("NumberFormat", WideString(m_strNumberFormat));
+		if (m_bUseNumberFormat) {
+			vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,12).OlePropertySet("NumberFormat", WideString(m_strNumberFormat));
+        }
 
 		nRow++;
 
 		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,11).OlePropertySet("Value", WideString(L"Сумма сумм по дням:"));
 		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,12).OlePropertySet("Value", WideString(fSumSum));
-		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,12).OlePropertySet("NumberFormat", WideString(m_strNumberFormat));
+		if (m_bUseNumberFormat) {
+			vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,12).OlePropertySet("NumberFormat", WideString(m_strNumberFormat));
+        }
 	}
 
 	Log->Lines->Add(L"Сортирую...");
@@ -656,8 +606,10 @@ void __fastcall TForm1::actCalcClassificationExecute(TObject *Sender)
 			if (sLastClass != months[i].Class && sLastClass != L"") {
 			  setBordersBold(vSheetMonth, nRow, 17);
 			  vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,17).OlePropertyGet("Font").OlePropertySet("Bold", true);
-              vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,17).OlePropertySet("Value", WideString(nSummByClass));
-			  vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,17).OlePropertySet("NumberFormat", WideString(m_strNumberFormat));
+			  vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,17).OlePropertySet("Value", WideString(nSummByClass));
+			  if (m_bUseNumberFormat) {
+				  vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,17).OlePropertySet("NumberFormat", WideString(m_strNumberFormat));
+              }
 
 			  nRow++;
 			  sLastClass = months[i].Class;
@@ -669,7 +621,9 @@ void __fastcall TForm1::actCalcClassificationExecute(TObject *Sender)
 			vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,14).OlePropertySet("Value", WideString(months[i].Class));
 			vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,15).OlePropertySet("Value", WideString(months[i].Name));
 			vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,16).OlePropertySet("Value", WideString(months[i].Price));
-			vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,16).OlePropertySet("NumberFormat", WideString(m_strNumberFormat));
+			if (m_bUseNumberFormat) {
+				vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,16).OlePropertySet("NumberFormat", WideString(m_strNumberFormat));
+            }
 
 			if (months[i].Price < 0) {
 				setColor(vSheetMonth, nRow, 16, RGBToInt(240, 230, 140));
@@ -690,14 +644,19 @@ void __fastcall TForm1::actCalcClassificationExecute(TObject *Sender)
 		setBordersBold(vSheetMonth, nRow, 17);
 		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,17).OlePropertyGet("Font").OlePropertySet("Bold", true);
 		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,17).OlePropertySet("Value", WideString(nSummByClass));
-		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,17).OlePropertySet("NumberFormat", WideString(m_strNumberFormat));
+		if (m_bUseNumberFormat) {
+			vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,17).OlePropertySet("NumberFormat", WideString(m_strNumberFormat));
+        }
 
 		nRow++;
 
 		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,14).OlePropertySet("Value", WideString(L"Итого:"));
 		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,16).OlePropertySet("Value", WideString(nSum));
-		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,16).OlePropertySet("NumberFormat", WideString(m_strNumberFormat));
-		vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,17).OlePropertySet("NumberFormat", WideString(m_strNumberFormat));
+		if (m_bUseNumberFormat) {
+			vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,16).OlePropertySet("NumberFormat", WideString(m_strNumberFormat));
+			vSheetMonth.OlePropertyGet("Cells").OlePropertyGet("Item",nRow,17).OlePropertySet("NumberFormat", WideString(m_strNumberFormat));
+		}
+
 	}
 
 	Log->Lines->Add(L"Сохраняю файл...");
@@ -953,6 +912,219 @@ void __fastcall TForm1::actSortClassificationsExecute(TObject *Sender)
 void __fastcall TForm1::FormCreate(TObject *Sender)
 {
 	lblStatus->Caption = L"";
+	TRegistry *reg = new TRegistry();
+	reg->RootKey = HKEY_CURRENT_USER;
+	reg->OpenKey(L"SOFTWARE\\HomeMoney\\Options", true);
+	if (!reg->ValueExists(L"NumberFormat")) {
+		reg->WriteString(L"NumberFormat", m_strNumberFormat);
+	} else {
+		m_strNumberFormat = reg->ReadString(L"NumberFormat");
+	}
+	if (!reg->ValueExists(L"UseNumberFormat")) {
+		reg->WriteBool(L"UseNumberFormat", m_bUseNumberFormat);
+	} else {
+		m_bUseNumberFormat = reg->ReadBool(L"UseNumberFormat");
+	}
+	reg->CloseKey();
+
+	delete reg;
+
+	updateLastOpenedFilesList();
+		
+	menuDisableUseNumberFormat->Enabled = m_bUseNumberFormat;
+	menuEnableUseNumberFormat->Enabled = !m_bUseNumberFormat;
+
+
+//	 TStringList *l=new TStringList;   //Список, в котором будет хранится
+//	   TRegistry *reg=new TRegistry();
+//	   reg->OpenKey("Software",0);  //Открываем ключ
+//	   reg->GetKeyNames(l);
+//	   ShowMessage(l->Text);
+//	   delete reg;
+}
+//---------------------------------------------------------------------------
+
+void TForm1::addFileNameToLast(const UnicodeString &strFileName) {
+
+	{
+		TRegistry *reg = new TRegistry();
+		reg->RootKey = HKEY_CURRENT_USER;
+		reg->OpenKey(L"SOFTWARE\\HomeMoney\\LastOpenedFiles", true);
+		TStringList *listOfNames = new TStringList();
+		reg->GetValueNames(listOfNames);
+		TStringList *listOfFiles = new TStringList();
+		for (int i = 0; i < listOfNames->Count; i++) {
+			listOfFiles->Add(reg->ReadString(listOfNames->Strings[i]));
+			reg->DeleteKey(listOfNames->Strings[i]);
+		}
+
+		// ShowMessage(L"listOfFiles->Text (1): " + listOfFiles->Text);
+				
+//		for (int i = 0; i < listOfFiles->Count; i++) {
+//			reg->DeleteKey(listOfFiles->Strings[i]);
+//		}
+
+		int pos = listOfFiles->IndexOf(strFileName);
+		if (pos >= 0) {
+			listOfFiles->Delete(pos);
+		}
+		listOfFiles->Insert(0, strFileName);
+		// ShowMessage(L"listOfFiles->Text (2): " + listOfFiles->Text);
+	
+		for (int i = 0; i < listOfFiles->Count; i++) {
+			UnicodeString sName = IntToStr(i);
+			while (sName.Length() < 4) {
+				sName = L"0" + sName;
+            }
+			sName = L"File_" + sName;
+			reg->WriteString(sName, listOfFiles->Strings[i]);
+		}
+	
+		reg->CloseKey();
+	
+		delete listOfFiles;
+		delete reg;
+    }
+
+	updateLastOpenedFilesList();
+		
+}
+
+void TForm1::updateLastOpenedFilesList() {
+	TStringList *listOfFiles = new TStringList();
+	{
+		TRegistry *reg = new TRegistry();
+		reg->OpenKey(L"SOFTWARE\\HomeMoney\\LastOpenedFiles", true);
+		TStringList *listOfNames = new TStringList();
+		reg->GetValueNames(listOfNames);
+		for (int i = 0; i < listOfNames->Count; i++) {
+			listOfFiles->Add(reg->ReadString(listOfNames->Strings[i]));
+		}
+		reg->CloseKey();
+		delete reg;
+    }
+	
+	//	ShowMessage(L"listOfFiles->Text (last): " + listOfFiles->Text);
+	menuLastOpenedFiles->Enabled = listOfFiles->Count > 0;
+
+	for (int i = menuLastOpenedFiles->Count-1; i >= 0; i--) {
+		menuLastOpenedFiles->Delete(i);
+	}
+	
+	for (int i = 0; i < listOfFiles->Count; i++) {
+		TMenuItem *pNewItem = new TMenuItem(menuLastOpenedFiles);
+		pNewItem->OnClick = clickOpenLastFile;
+		pNewItem->Caption = listOfFiles->Strings[i];
+		menuLastOpenedFiles->Add(pNewItem);
+	}
+
+	delete listOfFiles;
+
+}
+
+void __fastcall TForm1::actOpenExcelFileExecute(TObject *Sender)
+{
+	if (OpenDialog1->Execute()) {
+		openExcelFile(OpenDialog1->FileName);
+	}
+}
+//---------------------------------------------------------------------------
+
+void TForm1::openExcelFile(const UnicodeString &sFileName) {
+	edtFile->Text = "";
+	m_strFileName = "";
+
+	m_bBackup = false;
+
+	ExcelApp app;
+	UnicodeString sErrorMessage;
+	if (!app.open(sFileName, sErrorMessage)) {
+		MessageBox (Handle, sErrorMessage.c_str(), L"prompt", MB_OK);
+		edtFile->Text = "";
+		return;
+	}
+
+	edtFile->Text = sFileName;
+	Log->Lines->Add(L"Файл загружен производиться анализ");
+	Variant vSheets = app.sheets();
+
+	m_nPageClassification = 0;
+	m_vMonth.clear();
+	cmbMonth->Items->Clear();
+	cmbMonth->Items->Add("");
+	int nSheets = vSheets.OlePropertyGet("Count");
+	Log->Lines->Add(L"Всего листов: " + IntToStr(nSheets));
+	for (int i = 0; i < nSheets; i++) {
+		Variant vSheet = vSheets.OlePropertyGet("Item",i+1);
+		UnicodeString str = vSheet.OlePropertyGet("Name");
+		// ShowMessage(str);
+		if (str.UpperCase() == UnicodeString(L"классификации").UpperCase()) {
+			m_nPageClassification = i+1;
+		};
+		if (str.UpperCase().Pos(L"МЕСЯЦ ") > 0) {
+			cmbMonth->Items->Add(str);
+			exlSheet s;
+			s.Number = i+1;
+			s.Name = str;
+			m_vMonth.push_back(s);
+		}
+		Log->Lines->Add(L"Лист " + IntToStr(i+1) + L": " + str);
+	}
+
+	if (m_nPageClassification == 0) {
+		MessageBox(Handle, UnicodeString(L"Не найден лист 'классификации'").c_str(), L"prompt", MB_OK);
+		edtFile->Text = "";
+		return;
+	}
+
+	if (m_vMonth.size() == 0) {
+		MessageBox (Handle, UnicodeString(L"Не найден ни один лист с 'месяц xx'").c_str(), L"prompt", MB_OK);
+		edtFile->Text = "";
+		return;
+	}
+	m_strFileName = sFileName;
+	addFileNameToLast(sFileName);
+}
+	
+void __fastcall TForm1::menuNumberFormatClick(TObject *Sender)
+{
+	m_strNumberFormat = InputBox(L"Формат ячеек с суммами", L"Текущий формат", m_strNumberFormat);
+	TRegistry *reg = new TRegistry();
+	reg->RootKey = HKEY_CURRENT_USER;
+	reg->OpenKey(L"SOFTWARE\\HomeMoney\\Options", true);
+	reg->WriteString(L"NumberFormat", m_strNumberFormat);
+	reg->CloseKey();
+	delete reg;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::actUseNumberFormatExecute(TObject *Sender)
+{
+	m_bUseNumberFormat = !m_bUseNumberFormat;
+
+	TRegistry *reg = new TRegistry();
+	reg->RootKey = HKEY_CURRENT_USER;
+	reg->OpenKey(L"SOFTWARE\\HomeMoney\\Options", true);
+	reg->WriteBool(L"UseNumberFormat", m_bUseNumberFormat);
+	reg->CloseKey();
+	delete reg;
+
+	menuDisableUseNumberFormat->Enabled = m_bUseNumberFormat;
+	menuEnableUseNumberFormat->Enabled = !m_bUseNumberFormat;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::clickOpenLastFile(TObject *Sender)
+{
+	TMenuItem *pMenuItem = dynamic_cast<TMenuItem *>(Sender);
+	if (pMenuItem) {
+		UnicodeString filepath = pMenuItem->Caption;
+		if (filepath.Pos0(L"&") == 0) {
+			filepath = filepath.SubString(2, filepath.Length() - 1);
+		}
+		openExcelFile(filepath);
+//		ShowMessage(L"actOpenLastFileExecute: " + filepath);
+	}
 }
 //---------------------------------------------------------------------------
 

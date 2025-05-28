@@ -13,6 +13,7 @@
 #include <Vcl.ComCtrls.hpp>
 #include <System.Actions.hpp>
 #include <Vcl.ActnList.hpp>
+#include <Vcl.Menus.hpp>
 #include <vector>
 #include <ComObj.hpp>
 #include <utilcls.h>
@@ -61,7 +62,17 @@ __published:	// IDE-managed Components
 	TButton *btnRedesignClassifications;
 	TButton *btnSortClassifications;
 	TLabel *lblStatus;
-	void __fastcall Button1Click(TObject *Sender);
+	TMainMenu *MainMenu1;
+	TMenuItem *File1;
+	TMenuItem *OpenExcelfile1;
+	TAction *actOpenExcelFile;
+	TMenuItem *N1;
+	TMenuItem *menuNumberFormat;
+	TMenuItem *menuDisableUseNumberFormat;
+	TMenuItem *menuEnableUseNumberFormat;
+	TAction *actUseNumberFormat;
+	TMenuItem *menuLastOpenedFiles;
+	TMenuItem *est1;
 	void __fastcall actCalcClassificationExecute(TObject *Sender);
 	void __fastcall actCalcClassificationUpdate(TObject *Sender);
 	void __fastcall actViewClassificationsExecute(TObject *Sender);
@@ -71,10 +82,15 @@ __published:	// IDE-managed Components
 	void __fastcall actSortClassificationsUpdate(TObject *Sender);
 	void __fastcall actSortClassificationsExecute(TObject *Sender);
 	void __fastcall FormCreate(TObject *Sender);
+	void __fastcall actOpenExcelFileExecute(TObject *Sender);
+	void __fastcall menuNumberFormatClick(TObject *Sender);
+	void __fastcall actUseNumberFormatExecute(TObject *Sender);
+	void __fastcall clickOpenLastFile(TObject *Sender);
 private:	// User declarations
 	UnicodeString m_sUnknownClass;
 	UnicodeString m_strDecDelim;
 	UnicodeString m_strNumberFormat;
+	bool m_bUseNumberFormat;
 	int m_nPageClassification;
 	std::vector<exlSheet> m_vMonth;
 	bool m_bBackup;
@@ -91,7 +107,10 @@ private:	// User declarations
 	int RGBToInt(int r, int g, int b);
 	void ShowErr(const UnicodeString &sErrorMessage);
 	void SetSafeFocusOnMainWinow();
-    void sort(std::vector<ExcelMonthItem> &months);
+	void sort(std::vector<ExcelMonthItem> &months);
+	void addFileNameToLast(const UnicodeString &);
+	void updateLastOpenedFilesList();
+	void openExcelFile(const UnicodeString &sFileName);
 	UnicodeString createHyperLinkToClassification(std::vector<exlClass> &classes, int nLine);
 	UnicodeString m_strRecomendations;
 

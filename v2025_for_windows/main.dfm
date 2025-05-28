@@ -10,6 +10,7 @@ object Form1: TForm1
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
+  Menu = MainMenu1
   Position = poScreenCenter
   OnCreate = FormCreate
   DesignSize = (
@@ -43,13 +44,13 @@ object Form1: TForm1
   end
   object Button1: TButton
     Left = 803
-    Top = 6
+    Top = 8
     Width = 111
     Height = 25
+    Action = actOpenExcelFile
     Anchors = [akTop, akRight]
     Caption = #1042#1099#1073#1088#1072#1090#1100' '#1092#1072#1081#1083
     TabOrder = 1
-    OnClick = Button1Click
   end
   object Log: TMemo
     Left = 8
@@ -133,8 +134,8 @@ object Form1: TForm1
     Top = 56
   end
   object ActionList1: TActionList
-    Left = 704
-    Top = 48
+    Left = 728
+    Top = 96
     object actCalcClassification: TAction
       Caption = #1056#1072#1089#1089#1095#1080#1090#1072#1090#1100' '#1087#1086' '#1082#1083#1072#1089#1089#1080#1092#1080#1082#1072#1094#1080#1103#1084
       OnExecute = actCalcClassificationExecute
@@ -154,6 +155,46 @@ object Form1: TForm1
       Caption = #1054#1090#1089#1086#1088#1090#1080#1088#1086#1074#1072#1090#1100' '#1082#1083#1072#1089#1089#1080#1092#1080#1082#1072#1094#1080#1080
       OnExecute = actSortClassificationsExecute
       OnUpdate = actSortClassificationsUpdate
+    end
+    object actOpenExcelFile: TAction
+      Caption = 'Open Excel File'
+      OnExecute = actOpenExcelFileExecute
+    end
+    object actUseNumberFormat: TAction
+      Caption = 'actUseNumberFormat'
+      OnExecute = actUseNumberFormatExecute
+    end
+  end
+  object MainMenu1: TMainMenu
+    Left = 656
+    Top = 96
+    object File1: TMenuItem
+      Caption = #1060#1072#1081#1083
+      object OpenExcelfile1: TMenuItem
+        Action = actOpenExcelFile
+        Caption = #1054#1090#1082#1088#1099#1090#1100' Excel '#1092#1072#1081#1083
+      end
+      object menuLastOpenedFiles: TMenuItem
+        Caption = #1053#1077#1076#1072#1074#1085#1086' '#1086#1090#1082#1088#1099#1090#1099#1077
+        object est1: TMenuItem
+          Caption = 'Test'
+        end
+      end
+      object N1: TMenuItem
+        Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1080
+        object menuNumberFormat: TMenuItem
+          Caption = #1060#1086#1088#1084#1072#1090' '#1103#1095#1077#1077#1082' '#1089' '#1089#1091#1084#1084#1072#1084#1080
+          OnClick = menuNumberFormatClick
+        end
+        object menuDisableUseNumberFormat: TMenuItem
+          Action = actUseNumberFormat
+          Caption = #1054#1090#1082#1083#1102#1095#1080#1090#1100' '#1092#1086#1088#1084#1072#1090#1080#1088#1086#1074#1072#1085#1080#1077' '#1103#1095#1077#1077#1082
+        end
+        object menuEnableUseNumberFormat: TMenuItem
+          Action = actUseNumberFormat
+          Caption = #1042#1082#1083#1102#1095#1080#1090#1100' '#1092#1086#1088#1084#1072#1090#1080#1088#1086#1074#1072#1085#1080#1077' '#1103#1095#1077#1077#1082
+        end
+      end
     end
   end
 end
