@@ -112,7 +112,7 @@
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
         <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
         <BCC_PCHName_Clang>HomeMoneyPCH1.h</BCC_PCHName_Clang>
-        <OutputExt>x64_20250525.exe</OutputExt>
+        <OutputExt>x64_20250528.exe</OutputExt>
         <BCC_EnableBatchCompilation>true</BCC_EnableBatchCompilation>
         <UsePackages>false</UsePackages>
         <Icon_MainIcon>HomeMoney_Icon.ico</Icon_MainIcon>
