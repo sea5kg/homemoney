@@ -20,4 +20,4 @@
 ![Alt text](/screens/classification.png?raw=true "Main Screen")
 
 Файл с начальной таблицей:
-[Alt text](/v2025_for_windows/data/example.xlsx?raw=true)
+[example.xlsx](/v2025_for_windows/data/example.xlsx?raw=true)
