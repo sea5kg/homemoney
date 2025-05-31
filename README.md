@@ -1,21 +1,23 @@
 # homemoney
 
-helpful program for bookkeeping by home.
-Only windows.
+Вспомогательная программа для ведения домашней бугалтерии
 
-## Technologies
+Только под Windows (Ибо COM техноолгии от Microsoft)
+
+## На чем работает
 
 - c++
 - Compiler: x64 by Embarcadero Community
 - COM (ole)
 
-# It's not complited version!
-
-Main Windows Helpful program:
+Главное окно вспомогательной программы:
 ![Alt text](/screens/screen1.png?raw=true "Main Screen")
 
-Example of month in Excel:
+Пример оформления месеца в Excel (таблицы спарва это программа заполняет):
 ![Alt text](/screens/month.png?raw=true "Main Screen")
 
-Example of classifications in Excel:
+Пример классификаций покупок в Excel (класс выставляется пользователем):
 ![Alt text](/screens/classification.png?raw=true "Main Screen")
+
+Файл с начальной таблицей:
+[Alt text](/v2025_for_windows/data/example.xlsx?raw=true)
