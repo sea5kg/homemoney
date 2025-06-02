@@ -179,7 +179,18 @@ void TForm1::ReadMonth(Variant &vSheet, std::vector<ExcelMonthItem> &month)
 		mon.Month = strPageName;
 		mon.Name = vSheet.OlePropertyGet("Cells").OlePropertyGet("Item",i+1,3).OlePropertyGet("Value");
 		if (!mon.Name.Trim().IsEmpty()) {
-			mon.Price = vSheet.OlePropertyGet("Cells").OlePropertyGet("Item",i+1,4).OlePropertyGet("Value");
+			UnicodeString value = vSheet.OlePropertyGet("Cells").OlePropertyGet("Item",i+1,4).OlePropertyGet("Value");
+			mon.Price = 0.0f;
+			if (value != L"") {
+				try {
+					mon.Price = value.ToDouble();
+				} catch (...) {
+					// vSheet.OlePropertyGet("Cells").OlePropertyGet("Item",i+1,4).OleFunction("Select", true);
+					Log->Lines->Add(L"Ошибка: Не смог преобразовать строку '" + value + L"' в веществененое число" );
+					MessageBox (Handle, UnicodeString(L"Ошибка: Не смог преобразовать строку '" + value + L"' в веществененое число").c_str(), L"prompt", MB_OK);
+                    return false;
+				}
+            }
 			if (mon.Price != 0) {
 				nFound++;
 				month.push_back(mon);
