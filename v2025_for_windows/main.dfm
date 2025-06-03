@@ -195,6 +195,17 @@ object Form1: TForm1
           Caption = #1042#1082#1083#1102#1095#1080#1090#1100' '#1092#1086#1088#1084#1072#1090#1080#1088#1086#1074#1072#1085#1080#1077' '#1103#1095#1077#1077#1082
         end
       end
+      object mnuCreateFile: TMenuItem
+        Caption = #1057#1086#1079#1076#1072#1090#1100' '#1085#1072#1095#1072#1083#1100#1085#1099#1081' '#1092#1072#1081#1083
+        OnClick = mnuCreateFileClick
+      end
     end
+  end
+  object SaveDialog1: TSaveDialog
+    DefaultExt = 'xlsx'
+    FileName = 'example.xlsx'
+    Filter = 'Excel|*.xlsx'
+    Left = 776
+    Top = 64
   end
 end

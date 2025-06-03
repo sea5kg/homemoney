@@ -156,6 +156,7 @@
         <LinkPackageStatics>rtl.lib;vcl.lib</LinkPackageStatics>
         <DynamicRTL>false</DynamicRTL>
         <Icon_MainIcon>HomeMoney_Icon.ico</Icon_MainIcon>
+        <OutputExt>x64_20250602.exe</OutputExt>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <Defines>NDEBUG;$(Defines)</Defines>
@@ -198,6 +199,11 @@
             <DependentOn>main.h</DependentOn>
             <BuildOrder>2</BuildOrder>
         </CppCompile>
+        <ResourceCompile Include="Resources.rc">
+            <ModuleName>Resources.rc</ModuleName>
+            <Form>Resources.res</Form>
+            <BuildOrder>10</BuildOrder>
+        </ResourceCompile>
         <CppCompile Include="SelectClass.cpp">
             <Form>FormSelectClass</Form>
             <FormType>dfm</FormType>
@@ -336,13 +342,13 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="..\bin\HomeMoney.x64_20250521.exe" Configuration="Debug" Class="ProjectOutput">
+                <DeployFile LocalName="..\bin\HomeMoney.x64_20250602.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win64x">
                         <RemoteName>HomeMoney.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="..\bin\HomeMoney.x64_20250521.pdb" Configuration="Debug" Class="DebugSymbols">
+                <DeployFile LocalName="..\bin\HomeMoney.x64_20250602.pdb" Configuration="Debug" Class="DebugSymbols">
                     <Platform Name="Win64x">
                         <RemoteName>HomeMoney.pdb</RemoteName>
                         <Overwrite>true</Overwrite>

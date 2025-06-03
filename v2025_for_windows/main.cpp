@@ -188,7 +188,7 @@ void TForm1::ReadMonth(Variant &vSheet, std::vector<ExcelMonthItem> &month)
 					// vSheet.OlePropertyGet("Cells").OlePropertyGet("Item",i+1,4).OleFunction("Select", true);
 					Log->Lines->Add(L"Ошибка: Не смог преобразовать строку '" + value + L"' в веществененое число" );
 					MessageBox (Handle, UnicodeString(L"Ошибка: Не смог преобразовать строку '" + value + L"' в веществененое число").c_str(), L"prompt", MB_OK);
-                    return false;
+                    return;
 				}
             }
 			if (mon.Price != 0) {
@@ -1135,6 +1135,22 @@ void __fastcall TForm1::clickOpenLastFile(TObject *Sender)
 		}
 		openExcelFile(filepath);
 //		ShowMessage(L"actOpenLastFileExecute: " + filepath);
+	}
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::mnuCreateFileClick(TObject *Sender)
+{
+	SaveDialog1->FileName = "example.xlsx";
+	if (SaveDialog1->Execute()) {
+		TResourceStream *pStream = new TResourceStream((int64_t)HInstance, "EXAMPLE_XLSX", RT_RCDATA); //RT_RCDATA is the Resource Type.
+		__try {
+			pStream->SaveToFile(SaveDialog1->FileName);
+			openExcelFile(SaveDialog1->FileName);
+		}
+		__finally {
+			pStream->DisposeOf();
+		}
 	}
 }
 //---------------------------------------------------------------------------

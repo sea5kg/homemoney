@@ -73,6 +73,8 @@ __published:	// IDE-managed Components
 	TAction *actUseNumberFormat;
 	TMenuItem *menuLastOpenedFiles;
 	TMenuItem *est1;
+	TMenuItem *mnuCreateFile;
+	TSaveDialog *SaveDialog1;
 	void __fastcall actCalcClassificationExecute(TObject *Sender);
 	void __fastcall actCalcClassificationUpdate(TObject *Sender);
 	void __fastcall actViewClassificationsExecute(TObject *Sender);
@@ -86,6 +88,7 @@ __published:	// IDE-managed Components
 	void __fastcall menuNumberFormatClick(TObject *Sender);
 	void __fastcall actUseNumberFormatExecute(TObject *Sender);
 	void __fastcall clickOpenLastFile(TObject *Sender);
+	void __fastcall mnuCreateFileClick(TObject *Sender);
 private:	// User declarations
 	UnicodeString m_sUnknownClass;
 	UnicodeString m_strDecDelim;
